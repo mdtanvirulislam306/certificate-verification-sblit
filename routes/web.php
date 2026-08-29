@@ -7,18 +7,18 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+    return Inertia::render('Landing');
 })->name('home');
 
 Route::get('/verify/{code}', [CertificateVerificationController::class, 'show'])->name('verify.show');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified', 'admin'])->name('dashboard');
+Route::redirect('/dashboard', '/admin')->name('dashboard.redirect');
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
     Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class)->except(['show']);
     Route::get('certificates/{certificate}/generate', [AdminCertificateController::class, 'generate'])
         ->name('certificates.generate');
